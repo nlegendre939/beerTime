@@ -1,21 +1,23 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}
-    Accueil - BeerTime
+Découvrez BeerTime, le site de référence sur les événements autour de la bière
 {% endblock %}
 
 {% block stylesheets %}
-    <link rel="stylesheet" href="{{ asset('css/main/index.css') }}">
+<link rel="stylesheet" href="{{ asset('css/main/index.css') }}"> <!-- asset : chemin dossier public -->
 {% endblock %}
 
+{% block mainClasses %}no-spaces{% endblock %}
+
 {% block body %}
-    <div class="landing">
-        <div class="landing-content">
-            <h1>Bienvenue sur BeerTime</h1>
-            <h2>Les meilleurs événements autour de la bière</h2>
-            <a href=""{{ path('event_list') }}"" class="button">
-                Voir nos événements
-            </a>
-        </div>
+<div class="landing">
+    <div class="landing-content">
+        <h1>Bienvenue sur BeerTime</h1>
+        <h2>Les meilleurs événements autour de la bière</h2>
+        <a href="{{ path('event_list') }}" class="button">
+            Voir nos événements
+        </a>
     </div>
+</div>
 {% endblock %}

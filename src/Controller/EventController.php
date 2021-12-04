@@ -1,6 +1,7 @@
 <?php
 namespace App\Controller;
 
+use App\Repository\EventRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -8,24 +9,31 @@ use Symfony\Component\Routing\Annotation\Route;
 #[Route('/event', name: 'event_')]
 class EventController extends AbstractController
 {
+    private $eventRepository;
+
+    public function __construct(EventRepository $eventRepository)
+    {
+        $this->eventRepository = $eventRepository;
+    }
 
     #[Route('', name: 'list')]
-    public function event(): Response
+    public function list(): Response
     {
-        return $this->render('event/list.html.twig', [
-            'controller_name' => 'EventController',
+        $events = $this->eventRepository->findAll(); /* findAll() : pour tout réclamer (récupérer les différents events) */
+
+        return $this->render('event/list.html.twig', [ /* render : accès au template event/list */
+            'events' => $events /* option : associe template (twig events) à $events (variable qui contient les données) */
         ]);
     }
 
-    public function list(): Response
-    {
-        return new Response("Page liste d'événements");
-    }
-
-    #[Route('/{id}', name: 'show', requirements: ['id' => '\d+'])]
+    #[Route('/{id}', name: 'show', requirements: ['id' => '\d+'])] /* 'd+' : entier positif */
     public function show($id): Response
-    {
-        return new Response("Page vu d'un événement : " . $id);
+    {   /* Afficher un événement */
+        $event = $this->eventRepository->find($id);
+
+        return $this->render('event/show.html.twig', [
+            'event' => $event
+        ]);
     }
 
     #[Route('/new', name: 'new')]

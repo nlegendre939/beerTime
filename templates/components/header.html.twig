@@ -1,19 +1,18 @@
 <header>
-    <a href=""{{ path('main_index') }}"" class="title">
-        <img src="{{asset('images/logo.svg')}}" alt="logo bière"> <!-- chemin images dans public -->
+    <a href="{{ path('main_index') }}" class="title">
+        <img src="{{ asset('images/logo.svg') }}" alt="Logo BeerTime">
         BeerTime
     </a>
 
     <nav>
         <ul>
             <li>
-                <a href="{{ path('main_index') }}">Accueil</a>
-            </li>
-            <li>
-                <a href="{{ path('event_list') }}">Nos événements</a> <!-- chemin page -->
+                <a href="{{ path('event_list') }}">Nos événements</a>
+                <!-- Chemin vers les pages src/EventController/page event_list -->
             </li>
             <li>
                 <a href="{{ path('main_about') }}">A propos</a>
+                <!-- Chemin vers les pages src/MainController/page main_about -->
             </li>
             <li>
                 <a href="{{ path('main_contact') }}">Contact</a>
