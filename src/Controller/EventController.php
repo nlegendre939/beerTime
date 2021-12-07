@@ -61,6 +61,11 @@ class EventController extends AbstractController
 
             $this->em->persist($event); // persist : pour suivre le nouvel objet $event
             $this->em->flush(); // flush : appliquer les modifications en base de données
+
+            $this->addFlash('notice', 'Votre événement à bien été créé'); // notification
+            return $this->redirectToRoute('event_show', [
+                'id' => $event->getId(),
+            ]);
         }
         return $this->render('event/form.html.twig', [
             'form' => $form->createView(), /* createView() : prépare l'affichage du formulaire */

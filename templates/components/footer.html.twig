@@ -1,5 +1,8 @@
 <footer>
-    <p>BeerTime - Tous droits réservés {{ date()|date("Y") }}</p>
+    <p>
+        <a href="{{path('main_about')}}">
+            BeerTime
+        </a> - Tous droits réservés {{ date()|date("Y") }}</p>
     <!-- date() : fonction twig qui revoie la date de maintenant, | : filtre twig, date("Y") : définit le format de datetime -->
     <!-- équivalent à : (new DateTime())->format("Y"); -->
 </footer>
