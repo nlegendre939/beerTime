@@ -14,21 +14,27 @@
                 <a href="{{ path('event_new') }}">Créer un événementt</a>
             </li>
             <li>
-                <a href="{{ path('main_about') }}">À propos</a>
-                <!-- Chemin vers les pages src/MainController/page main_about -->
-            </li>
-            <li>
                 <a href="{{ path('main_contact') }}">Contact</a>
             </li>
         </ul>
     </nav>
 
     <div class="account">
-        <a href="#">
-            Connexion
-        </a>
-        <a href="{{ path('user_register')}}">
-            Inscription
-        </a>
+        {% if app.user %}
+            <a href="#">
+                <i class="fas fa-user"></i>
+                {{ app.user.username }}
+            </a>
+            <a href="{{ path('user_logout') }}">
+                Déconnexion
+            </a>
+        {% else %}
+            <a href="{{ path('user_login') }}">
+                Connexion
+            </a>
+            <a href="{{ path('user_register') }}">
+                Inscription
+            </a>
+        {% endif %}
     </div>
 </header>
