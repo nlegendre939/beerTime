@@ -31,11 +31,11 @@ class UserType extends AbstractType
                 'label' => 'Date de naissance',
                 'widget' => 'single_text',
             ])
-            ->add('cgu', CheckboxType::class, [
+            ->add('cgu', CheckboxType::class, [ /* cgu n'est pas dans la bdd */
                 'label' => 'J\'accepte les conditions générales d\'utilisation',
-                'mapped' => false,
+                'mapped' => false, /* permet de ne pas connecté cgu à User::class */
                 'constraints' => [
-                    new IsTrue([
+                    new IsTrue([ /* vérifie si case coché */
                         'message' => 'Vous devez accepter nos CGU'
                     ]),
                 ]

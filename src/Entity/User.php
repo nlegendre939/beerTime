@@ -156,7 +156,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getBirthdate(): ?\DateTimeInterface
+    public function getBirthdate(): ?\DateTimeInterface /* ?\DateTimeInterface : null ou \DateTimeInterface  */
     {
         return $this->birthdate;
     }
@@ -224,6 +224,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function getUserIdentifier(): string
     {
-        return $this->email;
+        return $this->email; /* Permet de s'identifier sur le site avec l'e-mail */
     }
 }

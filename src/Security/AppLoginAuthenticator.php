@@ -20,6 +20,7 @@ class AppLoginAuthenticator extends AbstractAuthenticator
     private $requestStack;
     private $urlGenerator;
 
+    /* requestStack : récupérer session dans un service, urlGenerator : url de redirection */
     public function __construct(RequestStack $requestStack, UrlGeneratorInterface $urlGenerator)
     {
         $this->requestStack = $requestStack;
@@ -63,6 +64,7 @@ class AppLoginAuthenticator extends AbstractAuthenticator
         return new RedirectResponse($url);
     }
 
+    /* AuthenticationException : message d'erreur si erreur tentative de connexion */
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
         $session = $this->requestStack->getSession();
