@@ -4,6 +4,10 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    payment:
+        publicKey: '%env(resolve:STRIPE_PUBLIC_KEY)%'
+        privateKey: '%env(resolve:STRIPE_PRIVATE_KEY)%'
+        currency: EUR
 
 services:
     # default configuration for services in *this* file

@@ -3,7 +3,10 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Entity\Event;
+use App\Entity\Booking;
 use App\Form\EventType;
+use App\Service\PaymentService;
+use Symfony\Component\Uid\Uuid;
 use App\Repository\EventRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,11 +20,15 @@ class EventController extends AbstractController
 {
     private $em;
     private $eventRepository;
+    private $paymentService;
 
-    public function __construct(EntityManagerInterface $em, EventRepository $eventRepository) /*plusieurs services dans le constructeur : injecter un service dans un service */
+    public function __construct(EntityManagerInterface $em, 
+    EventRepository $eventRepository,
+    PaymentService $paymentService) /*plusieurs services dans le constructeur : injecter un service dans un service */
     {
         $this->em = $em;
         $this->eventRepository = $eventRepository;
+        $this->paymentService = $paymentService;
     }
 
     #[Route('', name: 'list')]
@@ -46,7 +53,6 @@ class EventController extends AbstractController
 
     #[Route('/new', name: 'new')]
     #[Route('/{id}/edit', name: 'edit', requirements: ['id' => '\d+'])]
-    #[IsGranted('ROLE_ORGANIZER')]
     #[IsGranted('EVENT_FORM', subject: 'event')]
     public function form(Request $request, Event $event = null): Response
     {
@@ -54,6 +60,7 @@ class EventController extends AbstractController
             $isNew = false;
         }else{
             $event = new Event();
+            $event->setOwner($this->getUser());
             $isNew = true;
         }
 
@@ -65,14 +72,11 @@ class EventController extends AbstractController
         
         if(($form->isSubmitted()) && $form->isValid()) 
         {
-            // TODO - Remplacer par l'utilisateur connecté
-            $event->setOwner($this->getUser());
-
             $this->em->persist($event); // persist : pour suivre le nouvel objet $event
             $this->em->flush(); // flush : appliquer les modifications en base de données
 
             $message = sprintf('Votre événement à bien été %s', $isNew ? 'créé' : 'modifié');
-            $this->addFlash('notice', 'Votre événement à bien été créé'); // notification
+            $this->addFlash('notice', $message); // notification
             return $this->redirectToRoute('event_show', [
                 'id' => $event->getId(),
             ]);
@@ -80,6 +84,36 @@ class EventController extends AbstractController
         return $this->render('event/form.html.twig', [
             'form' => $form->createView(), /* createView() : prépare l'affichage du formulaire */
             'isNew' => $isNew
+        ]);
+    }
+
+     #[Route('/{id}/booking', name: 'booking', requirements: ['id' => '\d+'])]
+    public function booking(Request $request, Event $event): Response
+    {
+        if($request->query->has('payment_intent')){
+            $paymentIntentId = $request->query->get('payment_intent');
+
+            if($this->paymentService->checkPaymentIntent($paymentIntentId)){
+                $booking = new Booking();
+                $booking->setEvent($event);
+                $booking->setUser($this->getUser());
+                $booking->setReference(Uuid::v4());
+
+                $this->em->persist($booking);
+                $this->em->flush();
+
+                return $this->render('event/booking-confirmation.html.twig', [
+                    'booking' => $booking,
+                ]);
+            }
+        }
+
+        $paymentIntent = $this->paymentService->createPaymentIntent($event->getPrice());
+
+        return $this->render('event/booking.html.twig', [
+            'event' => $event,
+            'paymentPublicKey' => $this->paymentService->getPublicKey(),
+            'paymentIntentSecret' => $paymentIntent->client_secret
         ]);
     }
 }

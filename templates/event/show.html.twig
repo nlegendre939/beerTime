@@ -30,16 +30,23 @@
                         <!-- if event.place : si place existe alors t'affiche...
                         else : si non t'affiche À distance -->
                         {% if event.place %}
-                        {{ event.place.name }}<br>
-                        {{ event.place.street }}<br>
-                        {{ event.place.zipcode }} - {{ event.place.city }}
+                            {{ event.place.name }}<br>
+                            {{ event.place.street }}<br>
+                            {{ event.place.zipcode }} - {{ event.place.city }}
                         {% else %}
-                        A distance
+                            À distance
                         {% endif %}
                     </li>
                     <li data-icon="&#xf007">
                         {{ event.owner.username }}
                     </li>
+                    {% if is_granted('EVENT_FORM', event) %}
+                    <li>
+                       <a href="{{path('event_edit', {id: event.id}) }}" class="button"> {# {id: event.id} : en twig {} = tableau avec les id des events dedans #}
+                           Modifier
+                       </a> 
+                    </li>
+                    {% endif %}
                 </ul>
             </aside>
         </div>
@@ -60,7 +67,11 @@
                 <i class="fas fa-ticket-alt"></i>
                 10 places restantes
             </span>
-            <a href="#" class="button">Réserver</a>
+            <a href="{{ path('event_booking', {
+                id: event.id
+            }) }}" class="button">
+                Réserver
+            </a>
         </div>
     </article>
 {% endblock %}

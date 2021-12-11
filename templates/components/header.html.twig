@@ -10,9 +10,11 @@
                 <a href="{{ path('event_list') }}">Nos événements</a>
                 <!-- Chemin vers les pages src/EventController/page event_list -->
             </li>
+            {% if is_granted('EVENT_FORM') %} <!-- Déclenche le voter -->
             <li>
                 <a href="{{ path('event_new') }}">Créer un événementt</a>
             </li>
+            {% endif %}
             <li>
                 <a href="{{ path('main_contact') }}">Contact</a>
             </li>
