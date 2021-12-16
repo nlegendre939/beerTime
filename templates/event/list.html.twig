@@ -1,65 +1,76 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Liste des événements{% endblock %}
+{% block title %}Liste des événements - {{ parent() }}{% endblock %}
 
 {% block stylesheets %}
-<link rel="stylesheet" href="{{ asset('css/event/list.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/components/form.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/event/list.css') }}">
 {% endblock %}
 
 {% block body %}
-<h1>Nos événements</h1>
+    <h1>Nos événements</h1>
 
-<div class="events">
-    {% for event in events %}
-
-    <article class="event">
-        <div class="event-picture">
-            <!-- set statusText  : assigne une valeur à la variable définit à l'intérieur du template  -->
-            {% if event.endAt < date() %} 
-                {% set statusText='Passé' %} 
-                {% set statusColor='red' %} 
-            {% elseif event.startAt < date() %} 
-                {% set statusText='En cours' %} 
-                {% set statusColor='blue' %} 
-            {% else %} 
-                {% set statusText='A venir' %} 
-                {% set statusColor='green' %} 
-            {% endif %} 
-            <span class="event-status {{ statusColor }}">
-                {{ statusText }}
-            </span>
-            <img src="{{ event.picture }}" alt="{{ event.name }}">
-            <!-- pour accéder au nom : event.name (twig) accède au getter getName = echo $event->getName() (php) / double accolade = echo  -->
+    {{ form_start(searchForm) }}
+        <div class="form-row">
+            {{ form_row(searchForm.query) }}
+            {{ form_row(searchForm.category) }}
         </div>
-        <div class="event-summary">
-            <h2>{{ event.name }}</h2>
-            <p>{{ event.description|slice(0, 80) }} ...</p>
-            <aside>
-                <ul>
-                    <li>
-                        <i class="fas fa-{{ event.category.icon }}"></i>
-                        {{ event.category.name }}
-                    </li>
-                    <li>
-                        <i class="fas fa-map-marker-alt"></i>
-                        {{ event.place ? event.place.name : 'À distance' }}
-                        <!-- condition place ? si c'est non null (true) renvoie name : si c'est null (false) revoie à distance  -->
-                    </li>
-                    <li>
-                        <i class="fas fa-calendar-alt"></i>
-                        {{ event.startAt|date('d/m/Y H:i') }}
-                        <!-- H:i heure minute -->
-                    </li>
-                </ul>
-            </aside>
-            <div class="event-action">
-                <a href="{{ path('event_show', {id: event.id}) }}" class="button">En savoir plus</a>
-                <!-- {id: event.id} : second paramètre id: vaut event.id (id de l'event sélectionné) -->
-            </div>
+        <div class="form-row">
+            {{ form_row(searchForm.free) }}
+            {{ form_row(searchForm.submit) }}
         </div>
-    </article>
+        {{ form_end(searchForm) }}
 
-    {% endfor %}
-</div>
+    <div class="events">
+        {% for event in events %}
+            <article class="event">
+                <div class="event-picture">
+                    <!-- set statusText  : assigne une valeur à la variable définit à l'intérieur du template  -->
+                    {% if event.endAt < date() %} 
+                        {% set statusText='Passé' %} 
+                        {% set statusColor='red' %} 
+                    {% elseif event.startAt < date() %} 
+                        {% set statusText='En cours' %} 
+                        {% set statusColor='blue' %} 
+                    {% else %} 
+                        {% set statusText='A venir' %} 
+                        {% set statusColor='green' %} 
+                    {% endif %} 
+                    <span class="event-status {{ statusColor }}">
+                        {{ statusText }}
+                    </span>
+                    {% include "components/event-media.html.twig" %}
+                </div>
+                <div class="event-summary">
+                    <h2>{{ event.name }}</h2>
+                    <p>{{ event.description|slice(0, 80) }} ...</p>
+                    <aside>
+                        <ul>
+                            <li>
+                                <i class="fas fa-{{ event.category.icon }}"></i>
+                                {{ event.category.name }}
+                            </li>
+                            <li>
+                                <i class="fas fa-map-marker-alt"></i>
+                                {{ event.place ? event.place.name : 'À distance' }}
+                                <!-- condition place ? si c'est non null (true) renvoie name : si c'est null (false) revoie à distance  -->
+                            </li>
+                            <li>
+                                <i class="fas fa-calendar-alt"></i>
+                                {{ event.startAt|date('d/m/Y H:i') }}
+                                <!-- H:i heure minute -->
+                            </li>
+                        </ul>
+                    </aside>
+                    <div class="event-action">
+                        <a href="{{ path('event_show', {id: event.id}) }}" class="button">En savoir plus</a>
+                        <!-- {id: event.id} : second paramètre id: vaut event.id (id de l'event sélectionné) -->
+                    </div>
+                </div>
+            </article>
+        {% else %}
+            <p>Aucun résultat disponible</p>    
+        {% endfor %}
+    </div>
 
 {% endblock %}

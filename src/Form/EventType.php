@@ -4,11 +4,12 @@ namespace App\Form;
 
 use App\Entity\Event;
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\MoneyType;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
+use Symfony\Component\Form\Extension\Core\Type\FileType;
+use Symfony\Component\Form\Extension\Core\Type\MoneyType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
 class EventType extends AbstractType
 {
@@ -16,14 +17,16 @@ class EventType extends AbstractType
     {
         $builder
             ->add('name', null, [
-                'label' => 'Nom de l\événement',
+                'label' => 'Nom de l\'événement',
                 'attr' => [
                     'placeholder' => 'Soirée dégustation de Kwak'
                 ]
             ])
-            ->add('picture', UrlType::class, [
-                'label' => 'Image',
-                'help' => 'URL de l\'image'
+            ->add('pictureUrl', UrlType::class, [
+                'label' => 'Url de l\'image',
+            ])
+            ->add('pictureFile', FileType::class, [
+                'label' => 'Importer une image',
             ])
             ->add('description', null, [
                 'attr' => [
@@ -35,15 +38,15 @@ class EventType extends AbstractType
                 'date_widget' => 'single_text',
                 'time_widget' => 'single_text',
                 'attr' => [
-                    'class' => 'datetime-widget'
+                    'class' => 'datetime-widget',
                 ]
             ])
             ->add('endAt', null, [
-                'label' => 'Date de début',
+                'label' => 'Date de fin',
                 'date_widget' => 'single_text',
                 'time_widget' => 'single_text',
                 'attr' => [
-                    'class' => 'datetime-widget'
+                    'class' => 'datetime-widget',
                 ]
             ])
             ->add('price', MoneyType::class, [
@@ -56,10 +59,13 @@ class EventType extends AbstractType
                 'choice_label' => 'name',
                 'label' => 'Catégorie',
             ])
-            ->add('place', null, [
-                'choice_label' => 'name',
+            // ->add('place', null, [
+            //     'choice_label' => 'name',
+            //     'label' => 'Lieu',
+            //     'placeholder' => 'A distance',
+            // ])
+            ->add('place', PlaceType::class, [
                 'label' => 'Lieu',
-                'placeholder' => 'À distance'
             ])
             ->add('rules', null, [
                 'label' => 'Conditions d\'accès',
@@ -69,9 +75,10 @@ class EventType extends AbstractType
             ->add('submit', SubmitType::class, [
                 'label' => 'Enregistrer',
                 'attr' => [
-                    'class' => 'button'
+                    'class' => 'button',
                 ]
-            ]);
+            ])
+        ;
     }
 
     public function configureOptions(OptionsResolver $resolver): void /* option du formulaire */

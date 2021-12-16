@@ -5,6 +5,8 @@ use App\Entity\User;
 use App\Entity\Event;
 use App\Entity\Booking;
 use App\Form\EventType;
+use App\Form\SearchEventType;
+use App\Service\MediaService;
 use App\Service\PaymentService;
 use Symfony\Component\Uid\Uuid;
 use App\Repository\EventRepository;
@@ -20,24 +22,33 @@ class EventController extends AbstractController
 {
     private $em;
     private $eventRepository;
+    private $mediaService;
     private $paymentService;
 
-    public function __construct(EntityManagerInterface $em, 
-    EventRepository $eventRepository,
-    PaymentService $paymentService) /*plusieurs services dans le constructeur : injecter un service dans un service */
-    {
+    public function __construct(
+        EntityManagerInterface $em, 
+        EventRepository $eventRepository,
+        MediaService $mediaService,
+        PaymentService $paymentService /*plusieurs services dans le constructeur : injecter un service dans un service */
+    ){
         $this->em = $em;
         $this->eventRepository = $eventRepository;
+        $this->mediaService = $mediaService;
         $this->paymentService = $paymentService;
     }
 
     #[Route('', name: 'list')]
-    public function list(): Response
+    public function list(Request $request): Response
     {
-        $events = $this->eventRepository->findAll(); /* findAll() : pour tout réclamer (récupérer les différents events) */
+        $searchForm = $this->createForm(SearchEventType::class);
+        $searchForm->handleRequest($request);
+        $searchCriteria = $searchForm->getData();
+
+        $events = $this->eventRepository->search($searchCriteria);
 
         return $this->render('event/list.html.twig', [ /* render : accès au template event/list */
             'events' => $events, /* option : associe template (twig events) à $events (variable qui contient les données) */
+            'searchForm' => $searchForm->createView(),
         ]);
     }
 
@@ -72,6 +83,7 @@ class EventController extends AbstractController
         
         if(($form->isSubmitted()) && $form->isValid()) 
         {
+            $this->mediaService->handleEvent($event);
             $this->em->persist($event); // persist : pour suivre le nouvel objet $event
             $this->em->flush(); // flush : appliquer les modifications en base de données
 
@@ -87,13 +99,15 @@ class EventController extends AbstractController
         ]);
     }
 
-     #[Route('/{id}/booking', name: 'booking', requirements: ['id' => '\d+'])]
+    #[Route('/{id}/booking', name: 'booking', requirements: ['id' => '\d+'])]
+    #[IsGranted('BOOK_EVENT', subject: 'event')]
     public function booking(Request $request, Event $event): Response
     {
+        // isset($_GET['payment_intent'])
         if($request->query->has('payment_intent')){
             $paymentIntentId = $request->query->get('payment_intent');
 
-            if($this->paymentService->checkPaymentIntent($paymentIntentId)){
+            if(!$event->getPrice() || $this->paymentService->checkPaymentIntent($paymentIntentId)){
                 $booking = new Booking();
                 $booking->setEvent($event);
                 $booking->setUser($this->getUser());
@@ -102,18 +116,20 @@ class EventController extends AbstractController
                 $this->em->persist($booking);
                 $this->em->flush();
 
-                return $this->render('event/booking-confirmation.html.twig', [
-                    'booking' => $booking,
+                return $this->redirectToRoute('booking_confirmation', [
+                    'reference' => $booking->getReference(),
                 ]);
             }
         }
 
-        $paymentIntent = $this->paymentService->createPaymentIntent($event->getPrice());
+        if($event->getPrice()){
+            $paymentIntent = $this->paymentService->createPaymentIntent($event->getPrice());
+        }
 
         return $this->render('event/booking.html.twig', [
             'event' => $event,
             'paymentPublicKey' => $this->paymentService->getPublicKey(),
-            'paymentIntentSecret' => $paymentIntent->client_secret
+            'paymentIntentSecret' => isset($paymentIntent) ? $paymentIntent->client_secret : '',
         ]);
     }
 }

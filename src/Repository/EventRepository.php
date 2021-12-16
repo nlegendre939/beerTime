@@ -6,12 +6,6 @@ use App\Entity\Event;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-/**
- * @method Event|null find($id, $lockMode = null, $lockVersion = null)
- * @method Event|null findOneBy(array $criteria, array $orderBy = null)
- * @method Event[]    findAll()
- * @method Event[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
- */
 class EventRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
@@ -19,32 +13,28 @@ class EventRepository extends ServiceEntityRepository
         parent::__construct($registry, Event::class);
     }
 
-    // /**
-    //  * @return Event[] Returns an array of Event objects
-    //  */
-    /*
-    public function findByExampleField($value)
+    public function search($criteria)
     {
-        return $this->createQueryBuilder('e')
-            ->andWhere('e.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('e.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
+        $stmt = $this->createQueryBuilder('e');
 
-    /*
-    public function findOneBySomeField($value): ?Event
-    {
-        return $this->createQueryBuilder('e')
-            ->andWhere('e.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+        if(!empty($criteria['query'])){
+            $stmt->leftJoin('e.place', 'p');
+
+            $stmt->where('e.name LIKE :query');
+            $stmt->orWhere('e.description LIKE :query');
+            $stmt->orWhere('p.name LIKE :query');
+            $stmt->setParameter('query', '%' . $criteria['query'] . '%');
+        }
+
+        if(!empty($criteria['category'])){
+            $stmt->andWhere('e.category = :category');
+            $stmt->setParameter('category', $criteria['category']);
+        }
+
+        if(isset($criteria['free']) && $criteria['free'] === true){
+            $stmt->andWhere('e.price IS NULL');
+        }
+
+        return $stmt->getQuery()->getResult();
     }
-    */
 }

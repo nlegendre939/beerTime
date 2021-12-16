@@ -11,7 +11,7 @@
 {% block body %}
     <article class="event">
         <div class="event-view">
-            <img src="{{ event.picture }}" alt="{{ event.name }}">
+            {% include "components/event-media.html.twig" %}
             <h1>{{ event.name }}</h1>
         </div>
         <div class="event-summary">
@@ -52,8 +52,8 @@
         </div>
             <ul class="event-rules">
                 {% for rule in event.rules %}
-                <!-- arrayCollection : tableau de plusieurs règle => rule est un objet donc faut utiliser son label pour convertir en string -->
-                <li>{{ rule.label }}</li>
+                    <!-- arrayCollection : tableau de plusieurs règle => rule est un objet donc faut utiliser son label pour convertir en string -->
+                    <li>{{ rule.label }}</li>
                 {% endfor %}
             </ul>
         <div class="event-register">
@@ -67,11 +67,15 @@
                 <i class="fas fa-ticket-alt"></i>
                 10 places restantes
             </span>
-            <a href="{{ path('event_booking', {
-                id: event.id
-            }) }}" class="button">
-                Réserver
-            </a>
+            {% if is_granted('DISPLAY_BOOK_EVENT', event) %}
+                <a href="{{ path('event_booking', {
+                    id: event.id
+                }) }}" class="button">
+                    Réserver
+                </a>
+            {% else %}
+                <span>Déjà réservé</span>
+            {% endif %}
         </div>
     </article>
 {% endblock %}
